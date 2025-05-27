@@ -280,6 +280,14 @@
   <label for="sizeSelect">اختر الحجم:</label>
   <select id="sizeSelect" required></select>
 
+  <!-- إضافة اختيار طريقة الدفع -->
+  <label for="paymentMethod">طريقة الدفع:</label>
+  <select id="paymentMethod" required>
+    <option value="الدفع عند الاستلام">الدفع عند الاستلام</option>
+    <option value="الدفع الإلكتروني">الدفع الإلكتروني</option>
+    <option value="الدفع عن طريق البطاقة">الدفع عن طريق البطاقة</option>
+  </select>
+
   <p style="margin-top: 15px; font-weight:bold; text-align:center; color:#ff6f61;">
     رقم التواصل: 0506680706
   </p>
@@ -294,6 +302,7 @@
   const sizeSelect = document.getElementById('sizeSelect');
   const formTitle = document.getElementById('formTitle');
   const customerNameInput = document.getElementById('customerName');
+  const paymentMethodSelect = document.getElementById('paymentMethod');
 
   let currentType = '';
   let currentProduct = '';
@@ -320,6 +329,9 @@
       `;
     }
 
+    // تعيين طريقة الدفع الافتراضية
+    paymentMethodSelect.value = "الدفع عند الاستلام";
+
     customerNameInput.value = '';
     overlay.style.display = 'block';
     orderForm.style.display = 'block';
@@ -335,6 +347,7 @@
 
     const size = sizeSelect.value;
     const customerName = customerNameInput.value.trim();
+    const paymentMethod = paymentMethodSelect.value;
 
     if(customerName === '') {
       alert('يرجى إدخال الاسم الكامل');
@@ -346,31 +359,28 @@
     if(currentType === 'juice') {
       if(size === 'صغير') price = 7;
       else if(size === 'وسط') price = 10;
-      else price = 13;
+      else if(size === 'كبير') price = 13;
     } else if(currentType === 'icecream') {
       if(size === 'صغير') price = 5;
       else if(size === 'وسط') price = 10;
-      else price = 15;
+      else if(size === 'كبير') price = 15;
     }
 
-    const paymentMethod = "الدفع عند الاستلام";
+    const orderMessage = `تم تأكيد طلبك:\n` +
+                         `الاسم: ${customerName}\n` +
+                         `المنتج: ${currentProduct}\n` +
+                         `الحجم: ${size}\n` +
+                         `السعر: ${price} ريال\n` +
+                         `طريقة الدفع: ${paymentMethod}\n` +
+                         `رقم التواصل: 0506680706\n\n` +
+                         `شكراً لطلبك من عصائر حسام الطازجة!`;
 
-    const message = 
-`مرحبًا، اسمي ${customerName} وأرغب في طلب ${currentProduct} بحجم ${size}.
-السعر: ${price} ريال.
-طريقة الدفع: ${paymentMethod}.
-شكرًا لكم على خدمتكم المميزة 😊`;
-
-    const phone = '966506680706'; // كود السعودية + الرقم بدون 0
-
-    const whatsappURL = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-    window.open(whatsappURL, '_blank');
-
+    alert(orderMessage);
     closeForm();
-
-    alert('شكرًا لك على طلبك، سيتم التواصل معك قريبًا 😊');
   }
+
+  // إغلاق النموذج عند النقر خارج النموذج
+  overlay.addEventListener('click', closeForm);
 </script>
 
 </body>
