@@ -283,104 +283,94 @@
   <!-- إضافة اختيار طريقة الدفع -->
   <label for="paymentMethod">طريقة الدفع:</label>
   <select id="paymentMethod" required>
-    <option value="الدفع عند الاستلام">الدفع عند الاستلام</option>
+    <option value="(كاش-شيكة)الدفع عند الاستلام">(كاش-شيكة)الدفع عند الاستلام</option>
     <option value="الدفع الإلكتروني">الدفع الإلكتروني</option>
-    <option value="الدفع عن طريق البطاقة">الدفع عن طريق البطاقة</option>
+    <option value="التحويل البنكي">التحويل البنكي
+    </option>
   </select>
 
   <p style="margin-top: 15px; font-weight:bold; text-align:center; color:#ff6f61;">
-    رقم التواصل: 0506680706
+    رقم التواصل: 966506680706 (واتساب فقط)
   </p>
 
-  <button type="submit">تأكيد الطلب</button>
+  <button type="submit">إرسال الطلب</button>
   <button type="button" class="cancelBtn" onclick="closeForm()">إلغاء</button>
 </form>
 
 <script>
-  const overlay = document.getElementById('overlay');
-  const orderForm = document.getElementById('orderForm');
-  const sizeSelect = document.getElementById('sizeSelect');
-  const formTitle = document.getElementById('formTitle');
-  const customerNameInput = document.getElementById('customerName');
-  const paymentMethodSelect = document.getElementById('paymentMethod');
+  let currentProductType = "";
+  let currentProductName = "";
 
-  let currentType = '';
-  let currentProduct = '';
+  // الاحجام لكل نوع منتج
+  const sizes = {
+    juice: [
+      {label: "صغير (7ريال)", value: "صغير (7ريال)"},
+      {label: "متوسط (10ريال)", value: "متوسط (10ريال)"},
+      {label: "كبير (13ريال)", value: "كبير (13ريال)"}
+    ],
+    icecream: [
+      {label: "(5) صغير", value: "(5) صغير"},
+      {label: "(10) متوسط", value: "(10) متوسط"},
+      {label: "(15) كبير", value: "(15)كبير"}
+    ]
+  };
 
-  function openForm(type, product) {
-    currentType = type;
-    currentProduct = product;
+  function openForm(type, name) {
+    currentProductType = type;
+    currentProductName = name;
 
-    formTitle.textContent = `طلب ${type === 'juice' ? 'عصير' : 'آيس كريم'}: ${product}`;
+    document.getElementById("formTitle").textContent = `طلب ${name}`;
+    const sizeSelect = document.getElementById("sizeSelect");
+    sizeSelect.innerHTML = "";
 
-    sizeSelect.innerHTML = '';
+    sizes[type].forEach(size => {
+      const option = document.createElement("option");
+      option.value = size.value;
+      option.textContent = size.label;
+      sizeSelect.appendChild(option);
+    });
 
-    if(type === 'juice') {
-      sizeSelect.innerHTML = `
-        <option value="صغير">صغير - 7 ريال</option>
-        <option value="وسط">وسط - 10 ريال</option>
-        <option value="كبير">كبير - 13 ريال</option>
-      `;
-    } else if(type === 'icecream') {
-      sizeSelect.innerHTML = `
-        <option value="صغير">صغير - 5 ريال</option>
-        <option value="وسط">وسط - 10 ريال</option>
-        <option value="كبير">كبير - 15 ريال</option>
-      `;
-    }
+    document.getElementById("customerName").value = "";
+    document.getElementById("paymentMethod").value = "الدفع عند الاستلام";
 
-    // تعيين طريقة الدفع الافتراضية
-    paymentMethodSelect.value = "الدفع عند الاستلام";
-
-    customerNameInput.value = '';
-    overlay.style.display = 'block';
-    orderForm.style.display = 'block';
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("orderForm").style.display = "block";
   }
 
   function closeForm() {
-    overlay.style.display = 'none';
-    orderForm.style.display = 'none';
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("orderForm").style.display = "none";
   }
 
-  function submitOrder(e) {
-    e.preventDefault();
+  function submitOrder(event) {
+    event.preventDefault();
 
-    const size = sizeSelect.value;
-    const customerName = customerNameInput.value.trim();
-    const paymentMethod = paymentMethodSelect.value;
+    const name = document.getElementById("customerName").value.trim();
+    const size = document.getElementById("sizeSelect").value;
+    const payment = document.getElementById("paymentMethod").value;
 
-    if(customerName === '') {
-      alert('يرجى إدخال الاسم الكامل');
+    if (!name) {
+      alert("الرجاء إدخال الاسم الثلاثي.");
       return;
     }
 
-    let price = 0;
+    // صياغة رسالة الطلب للواتساب
+    const message =
+      `السلام عليكم، أود طلب ${currentProductName} بحجم ${size}.` +
+      `\nالاسم: ${name}` +
+      `\nطريقة الدفع: ${payment}` +
+      `\n\nشكراً لكم.`;
 
-    if(currentType === 'juice') {
-      if(size === 'صغير') price = 7;
-      else if(size === 'وسط') price = 10;
-      else if(size === 'كبير') price = 13;
-    } else if(currentType === 'icecream') {
-      if(size === 'صغير') price = 5;
-      else if(size === 'وسط') price = 10;
-      else if(size === 'كبير') price = 15;
-    }
+    const encodedMessage = encodeURIComponent(message);
 
-    const orderMessage = `تم تأكيد طلبك:\n` +
-                         `الاسم: ${customerName}\n` +
-                         `المنتج: ${currentProduct}\n` +
-                         `الحجم: ${size}\n` +
-                         `السعر: ${price} ريال\n` +
-                         `طريقة الدفع: ${paymentMethod}\n` +
-                         `رقم التواصل: 0506680706\n\n` +
-                         `شكراً لطلبك من عصائر حسام الطازجة!`;
+    // رقم واتساب بدون +
+    const phone = "966506680706";
 
-    alert(orderMessage);
+    // فتح رابط الواتساب في نافذة جديدة
+    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, "_blank");
+
     closeForm();
   }
-
-  // إغلاق النموذج عند النقر خارج النموذج
-  overlay.addEventListener('click', closeForm);
 </script>
 
 </body>
